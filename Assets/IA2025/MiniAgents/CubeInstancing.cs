@@ -20,6 +20,42 @@ public class CubeInstancing : MonoBehaviour
         //table[y,x]
         //el y sale del for buscando recorrrer el height del canvas
         //el x sale del for buscando recorrer el widht del canvas
+        for (int x = 1; x < height; x++)
+        {
+            for (int y = 2; y < width; y++)
+            {
+                if (table[y,x] == 3) //cuando se usa la arena
+                {
+                    if (table[y-1,x] == 3) //cuando hay una arena por debajo, pinta el espacio anterior
+                    {
+                        if (table[y-1,x+1] == 0)
+                        {
+                            table[y,x] = 0;
+                            table[y,x+1] = 3; //hara que se vaya acumulando 
+                        }
+                        else if (table[y-1,x-1] == 0)
+                        {
+                             table[y,x] = 0;
+                            table[y,x-1] = 3;
+                        }
+                        else
+                        {
+                            table[y,x] = 0;
+                            table[y,x] = 3; //hara que se vaya acumulando
+                        }
+                        
+
+                    }
+                    else // por otro lado, pintara el de abajo
+                    {
+                            
+                        table[y,x] = 0;
+                        table[y-1,x] = 3;
+                    }
+
+                }
+            }
+        }
     }
     // Update is called once per frame
     void Update()
