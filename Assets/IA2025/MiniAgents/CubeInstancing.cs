@@ -22,34 +22,60 @@ public class CubeInstancing : MonoBehaviour
         //el x sale del for buscando recorrer el widht del canvas
         for (int x = 1; x < height; x++)
         {
-            for (int y = 2; y < width; y++)
+            for (int y = 1; y < width; y++)
             {
                 switch (table[y,x])
                 {
                     case 3:
-                        if (table[y-1,x] == 0) //cuando hay una arena por debajo, pinta el espacio anterior
+                        if (table[y-1,x] == 0) //si es aire, pintar hacia abajo
                         {
                             table[y,x] = 0;
                             table[y-1,x] = 3;
                             break;
                         }
-                        else if (table[y-1,x] == 3 && table[y-1,x+1] == 3)//si derecha esta ocupado?
+                        else
                         {
-                            table[y,x] = 0;
-                            table[y-1,x-1] = 3; //pinta izquierda
-                            break;
-                        }
-                        else if (table[y-1,x] == 3 && table[y-1,x-1] == 3) //si izquierda esta ocupada?
-                        {
-                            table[y,x] = 0;
-                            table[y-1,x+1] = 3; 
-                            break;
-                        }
-                        else // por otro lado, se quedara quieto.
-                        {
-                            table[y,x] = 0;
-                            table[y,x] = 3;
-                            break;
+                            var random = Random.Range(0,2);
+                            if (random == 0) // prefiere izquierda
+                            {
+                                if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x+1] == 0) //la izquierda esta ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x+1] = 3; //pos lo pone en la izquierda
+                                    break;
+                                }
+                                else if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x-1] == 0)//derecha ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x-1] = 3; //pinta derecha
+                                    break;  
+                                }     
+                                else
+                                {
+                                    table[y,x] = 3;
+                                    break;
+                                }
+                                
+                            }else //prefiere derecha
+                            {
+                                if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x-1] == 0)//derecha ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x-1] = 3; //pinta derecha
+                                    break;  
+                                }
+                                else if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x+1] == 0) //la izquierda esta ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x+1] = 3; //pos lo pone en la izquierda
+                                    break;
+                                }
+                                else
+                                {
+                                    table[y,x] = 3;
+                                    break;
+                                }
+                            }
                         }
                     case 4:
                         //logica de agua
