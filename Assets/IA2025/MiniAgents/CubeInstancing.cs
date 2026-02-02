@@ -24,35 +24,36 @@ public class CubeInstancing : MonoBehaviour
         {
             for (int y = 2; y < width; y++)
             {
-                if (table[y,x] == 3) //cuando se usa la arena
+                switch (table[y,x])
                 {
-                    if (table[y-1,x] == 3) //cuando hay una arena por debajo, pinta el espacio anterior
-                    {
-                        if (table[y-1,x+1] == 0)
+                    case 3:
+                        if (table[y-1,x] == 0) //cuando hay una arena por debajo, pinta el espacio anterior
                         {
                             table[y,x] = 0;
-                            table[y,x+1] = 3; //hara que se vaya acumulando 
+                            table[y-1,x] = 3;
+                            break;
                         }
-                        else if (table[y-1,x-1] == 0)
-                        {
-                             table[y,x] = 0;
-                            table[y,x-1] = 3;
-                        }
-                        else
+                        else if (table[y-1,x] == 3 && table[y-1,x+1] == 3)//si derecha esta ocupado?
                         {
                             table[y,x] = 0;
-                            table[y,x] = 3; //hara que se vaya acumulando
+                            table[y-1,x-1] = 3; //pinta izquierda
+                            break;
                         }
-                        
-
-                    }
-                    else // por otro lado, pintara el de abajo
-                    {
-                            
-                        table[y,x] = 0;
-                        table[y-1,x] = 3;
-                    }
-
+                        else if (table[y-1,x] == 3 && table[y-1,x-1] == 3) //si izquierda esta ocupada?
+                        {
+                            table[y,x] = 0;
+                            table[y-1,x+1] = 3; 
+                            break;
+                        }
+                        else // por otro lado, se quedara quieto.
+                        {
+                            table[y,x] = 0;
+                            table[y,x] = 3;
+                            break;
+                        }
+                    case 4:
+                        //logica de agua
+                    break;
                 }
             }
         }
