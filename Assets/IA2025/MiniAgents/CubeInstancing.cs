@@ -20,10 +20,20 @@ public class CubeInstancing : MonoBehaviour
         //table[y,x]
         //el y sale del for buscando recorrrer el height del canvas
         //el x sale del for buscando recorrer el widht del canvas
-        for (int x = 1; x < height; x++)
+
+        //nueva aproximación -> buscar que haga comportamientos a la derecha si el frame es par o izquierda si es impar
+        bool par= Time.frameCount%2 == 0; //si es divisible entre 2 es par -> mover derecha
+        // si es impar -> izquierda
+        //concepto de bucle dinamico, que busca cambiar el comportamiento segun el momento, en este caso si es par o impar.
+        int startX = par ? 1 : width - 2;      // Empezamos en 1 o en el penúltimo (para no salirnos)
+        int endX   = par ? width - 1 : 0;      // Terminamos en el borde opuesto
+        int stepX  = par ? 1 : -1;             // Vamos sumando (+1) o restando (-1)
+
+        for (int y = 1; y < height - 1; y++)
         {
-            for (int y = 1; y < width; y++)
+            for (int x = startX; x != endX; x += stepX)
             {
+                if (x <= 0 || x >= width - 1 || y <= 0 || y >= height - 1) continue;
                 switch (table[y,x])
                 {
                     case 3:
@@ -31,6 +41,13 @@ public class CubeInstancing : MonoBehaviour
                         {
                             table[y,x] = 0;
                             table[y-1,x] = 3;
+                            break;
+                        }
+                        else if (table[y-1,x] == 4)
+                        {
+                            table[y,x] = 0;
+                            table[y-1,x] = 3;
+                            table[y,x] = 4;
                             break;
                         }
                         else
@@ -79,10 +96,183 @@ public class CubeInstancing : MonoBehaviour
                         }
                     case 4:
                         //logica de agua
+                        if (table[y-1,x] == 0) 
+                        {
+                            //caer
+                            table[y,x] = 0;
+                            table[y-1,x] = 4;
+                            break;
+                        }
+                        else if (table[y-1, x-1] == 0)
+                        {   //diagonal izq
+                            table[y,x] = 0;
+                            table[y-1,x-1] = 4;
+                            break;
+                        }
+                        else if (table[y-1, x+1] == 0)
+                        {
+                            //diag derech
+                            table[y,x] = 0;
+                            table[y-1,x+1] = 4;
+                            break;
+                        }
+                        else
+                        {
+                            if (par)
+                            {
+                                //hay espacio a la derecha? -> ve a la izquierda
+                                if (table[y, x-1] == 0)
+                                {
+                                    table[y, x] = 0;
+                                    table[y, x-1] = 4;
+                                    break;
+                                } 
+                            }
+                            else
+                            {
+                                //hay espacio a la izquierda? -> ve a la derecha
+                                if (table[y, x+1] == 0)
+                                {
+                                    table[y, x] = 0;
+                                    table[y, x+1] = 4;
+                                    break;
+                                }
+                            }
+                        }
                     break;
                 }
             }
         }
+
+        // lo de abajo funciona, pero no es una aproximación "pensada"
+        /*for (int x = 1; x < height; x++)
+        {
+            for (int y = 1; y < width; y++)
+            {
+                switch (table[y,x])
+                {
+                    case 3:
+                        if (table[y-1,x] == 0) //si es aire, pintar hacia abajo
+                        {
+                            table[y,x] = 0;
+                            table[y-1,x] = 3;
+                            break;
+                        }
+                        else if (table[y-1,x] == 4)
+                        {
+                            table[y,x] = 0;
+                            table[y-1,x] = 3;
+                            table[y,x] = 4;
+                            break;
+                        }
+                        else
+                        {
+                            var random = Random.Range(0,2);
+                            if (random == 0) // prefiere izquierda
+                            {
+                                if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x+1] == 0) //la izquierda esta ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x+1] = 3; //pos lo pone en la izquierda
+                                    break;
+                                }
+                                else if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x-1] == 0)//derecha ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x-1] = 3; //pinta derecha
+                                    break;  
+                                }     
+                                else
+                                {
+                                    table[y,x] = 3;
+                                    break;
+                                }
+                                
+                            }else //prefiere derecha
+                            {
+                                if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x-1] == 0)//derecha ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x-1] = 3; //pinta derecha
+                                    break;  
+                                }
+                                else if ((table[y-1,x] == 1 ||table[y-1,x] == 3) &&table[y-1,x+1] == 0) //la izquierda esta ocupada?
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x+1] = 3; //pos lo pone en la izquierda
+                                    break;
+                                }
+                                else
+                                {
+                                    table[y,x] = 3;
+                                    break;
+                                }
+                            }
+                        }
+                    case 4:
+                        //logica de agua
+                        if (table[y-1,x] == 0) //si es aire, pintar hacia abajo
+                        {
+                            table[y,x] = 0;
+                            table[y-1,x] = 4;
+                            break;
+                        }
+                        else if (table[y-1, x-1] == 0)
+                        {
+                            table[y,x] = 0;
+                            table[y-1,x-1] = 4;
+                            break;
+                        }
+                        else if (table[y-1, x+1] == 0)
+                        {
+                            table[y,x] = 0;
+                            table[y-1,x+1] = 4;
+                            break;
+                        }
+                        else if(table[y,x+1] == 0 || table[y,x-1] == 0)
+                        {
+                            var random = Random.Range(0,2);
+                            switch (random)
+                            {
+                                case 0:
+                                    if (table[y,x+1] == 0) //la derecha esta ocupada?
+                                    {
+                                        table[y,x] = 0;
+                                        table[y,x+1] = 4; //pos lo pone en la derecha
+                                        break;  
+                                    }
+                                    else if (table[y,x-1] == 0)//izquierda ocupada?
+                                    {
+                                        table[y,x] = 0;
+                                        table[y,x-1] = 4; //pinta izquierda
+                                        break;  
+                                    }                              
+                                break;
+                                case 1:
+                                    if (table[y,x-1] == 0)//izquierda ocupada?
+                                    {
+                                        table[y,x] = 0;
+                                        table[y,x-1] = 4; //pinta izquierda
+                                        break;  
+                                    }
+                                    else if (table[y,x+1] == 0) //la derecha esta ocupada?
+                                    {
+                                        table[y,x] = 0;
+                                        table[y,x+1] = 4; //pos lo pone en la derecha
+                                        break;
+                                    }
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            table[y,x] = 4;
+                            break;
+                        }
+                    break;
+                }
+            }
+        }*/
     }
     // Update is called once per frame
     void Update()
