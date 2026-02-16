@@ -25,9 +25,10 @@ public class CubeInstancing : MonoBehaviour
         bool par= Time.frameCount%2 == 0; //si es divisible entre 2 es par -> mover derecha
         // si es impar -> izquierda
         //concepto de bucle dinamico, que busca cambiar el comportamiento segun el momento, en este caso si es par o impar.
-        int startX = par ? 1 : width - 2;      // Empezamos en 1 o en el penúltimo (para no salirnos)
+        int startX = par ? 1 : width - 2;      // empieza en 1 o en el penúltimo
         int endX   = par ? width - 1 : 0;      // Terminamos en el borde opuesto
-        int stepX  = par ? 1 : -1;             // Vamos sumando (+1) o restando (-1)
+        int stepX  = par ? 1 : -1;             // suma (+1) o resta (-1)
+        
 
         for (int y = 1; y < height - 1; y++)
         {
@@ -138,6 +139,43 @@ public class CubeInstancing : MonoBehaviour
                                     break;
                                 }
                             }
+                        }
+                    break;
+                    case 5:
+
+                        if (table[y-1,x] == 0) 
+                        {
+                            //caer
+                            table[y,x] = 0;
+                            table[y-1,x] = 5;
+                            break;
+                        } 
+                        /*else if ( table[y-1,x] != 0 && table[y-1,x] == 4)
+                        {
+                            Debug.Log("entra en agua");  
+                            table[y,x] = 4;
+                            table[y-1,x] = 5;
+                            contador ++;
+                            if(contador > 3)
+                            {
+                                table[y-1,x] = 4;
+                                table[y+1,x] = 5;
+                                if(contador > 6)
+                                {
+                                    table[y,x] = 0;
+                                    table[y-1,x] = 5;  
+                                    contador = 0;
+                                }
+                                break;
+                            }
+                            break;
+                        } */
+                        else if (table[y-1,x] != 0 && table[y-1,x] == 5)
+                        {
+                            Debug.Log("reemplaza");    
+                            table[y,x] = 5;
+                            table[y-1,x]=0;
+                            break;
                         }
                     break;
                 }
@@ -310,10 +348,10 @@ public class CubeInstancing : MonoBehaviour
                 //Clean white
                 table[y, x] = 4;
             }
-            else if (Input.GetKey(KeyCode.Alpha5))
+            else if (Input.GetKeyDown(KeyCode.Alpha5))
             {
-                //Clean white
-                //table[y, x] = 5;
+                //mini roca
+                table[y, x] = 5;
             }
         }
         }catch

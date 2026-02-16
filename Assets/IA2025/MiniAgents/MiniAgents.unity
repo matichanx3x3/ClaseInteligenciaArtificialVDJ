@@ -215,6 +215,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: b0825042dfb6a494d89a4c46d7839b5f, type: 2}
   - {fileID: 2100000, guid: 2e9751b9d7a357848a337d69d4ebe09a, type: 2}
   - {fileID: 2100000, guid: e54547ebf8ac99a4094169206d431a79, type: 2}
+  - {fileID: 2100000, guid: 4c2f8da5ea52c4c30a1c96b0cf5d93c8, type: 2}
   width: 64
   height: 64
   meshCube: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
