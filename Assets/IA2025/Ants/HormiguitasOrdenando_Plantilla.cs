@@ -24,18 +24,20 @@ public class HormiguitasOrdenando_Plantilla : MonoBehaviour
         //CON 7 Y 4 FUNCIONA
         public void StepAnt()
         {
-            if(charge == 0)
+            if(charge == 0 && map[y,x] != 0)
             {
-                charge = map[y,x];
-                map[y,x] = 0;
-            }
-            else
-            {
-                if (CountElements )
+                if (CountElements(map[y,x],x,y,4) < 15)
                 {
-                    
+                    charge = map[y,x];
+                    map[y,x] = 0;
                 }
-                map[y,x] = charge;
+            }else if (charge != 0)
+            {
+                if (map[y,x] == 0 && CountElements(charge,x,y,7) > 15)
+                {
+                    map[y,x] = charge;
+                    charge = 0;
+                }
             }
             
             int rdm= Random.Range(0,4);
@@ -83,11 +85,17 @@ public class HormiguitasOrdenando_Plantilla : MonoBehaviour
         int CountElements(int type, int px,int py,int ks) //px y px -> punto donde esta la hormiga. ks (rango del radio que la hormiga puede ver).
         {
             int equal = 0;
-            for (int j = py; j < ks; j++)
+            for (int j = py-ks; j < py + ks; j++)
             {
-                for (int i = px; i < ks; i++)
+                for (int i = px - ks; i < px + ks; i++)
                 {
-                    
+                    if (i >= 0 && i < xRange && j >= 0 && j < yRange )
+                    {
+                        if (map[j, i] == type)
+                        {
+                            equal++;
+                        }
+                    }
                 }
             }
             // contar elementos cerca
