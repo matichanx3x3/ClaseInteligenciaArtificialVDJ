@@ -25,7 +25,8 @@ public class MazeGen : MonoBehaviour
     [Header("Generation")]
     public float stepDelay = 0.01f;
 
-    public int[,] matrizObjetos;
+    public TypeOfBlock[,] matrizObjetos;
+    private MeshRenderer[,] cellRenderer;
 
     [SerializeField] int centerX;
     [SerializeField] int centerY;
@@ -42,10 +43,10 @@ public class MazeGen : MonoBehaviour
         centerX = X / 2;
         centerY = Y / 2;
 
-        matrizObjetos = new int[X, Y];
-
+        matrizObjetos = new TypeOfBlock[X, Y];
+        cellRenderer = new MeshRenderer[X, Y];
         StopAllCoroutines();
-        StartCoroutine( GenerateBackground());
+        StartCoroutine(GenerateBackground());
     }
 
     private IEnumerator GenerateBackground()
@@ -98,6 +99,37 @@ public class MazeGen : MonoBehaviour
 
             stepLen++;
         }
+        yield return GenerateBorder();
+    }
+    private IEnumerator GenerateBorder()
+    {
+        // PUNTO 0,0
+        for (int i = 0; i < Y; i++)
+        {
+            SetCell(0, i, TypeOfBlock.MazeWall);
+            yield return StepWait();
+        }
+
+        // PUNTO X,Y
+        for (int i = Y-1; i > 0; i--)
+        {
+            SetCell(X-1, i, TypeOfBlock.MazeWall);
+            yield return StepWait();
+        }
+
+        // PUNTO 0,Y
+        for (int i = 1; i < X; i++)
+        {
+            SetCell(i, Y-1, TypeOfBlock.MazeWall);
+            yield return StepWait();
+        }
+
+        // PUNTO X,0
+        for (int i = X-1; i > 0; i--)
+        {
+            SetCell(i, 0,TypeOfBlock.MazeWall);
+            yield return StepWait();
+        }
     }
 
     YieldInstruction StepWait()
@@ -111,11 +143,22 @@ public class MazeGen : MonoBehaviour
         if(gx < 0 || gx >= X || gy < 0 || gy >= Y)
             return false;
         
-        CreateCube(gx, gy, TypeOfBlock.Background);
+        CreateCube(gx, gy);
         return true;
     }
 
-    public void CreateCube(int gx, int gy, TypeOfBlock type)
+    void SetCell(int gx, int gy, TypeOfBlock type)
+    {
+        if (gx < 0 || gx >= X || gy < 0 || gy >= Y) return;
+
+        matrizObjetos[gx, gy] = type;
+
+        var mr = cellRenderer[gx, gy];
+        if (mr != null)
+            mr.sharedMaterial = materials[(int)type];
+    }
+
+    public void CreateCube(int gx, int gy)
     {
         GameObject go = new GameObject($"Cell_{gx}_{gy}");
 
@@ -134,9 +177,9 @@ public class MazeGen : MonoBehaviour
         mf.sharedMesh = meshCube;
 
         var mr = go.AddComponent<MeshRenderer>();
-        mr.sharedMaterial = materials[(int)type];
-
-        Debug.Log("el cubo se instancio en width: "+gx +" y height: "+ gy + " con el valor: "+ type);
+        mr.sharedMaterial = materials[(int)TypeOfBlock.Background];
+        cellRenderer[gx, gy] = mr;
+        Debug.Log("el cubo se instancio en width: "+gx +" y height: "+ gy + " con el valor: "+ TypeOfBlock.Background);
 
     }
     
