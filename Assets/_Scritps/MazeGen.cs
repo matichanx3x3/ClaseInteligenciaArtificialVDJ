@@ -46,7 +46,18 @@ public class MazeGen : MonoBehaviour
         matrizObjetos = new TypeOfBlock[X, Y];
         cellRenderer = new MeshRenderer[X, Y];
         StopAllCoroutines();
-        StartCoroutine(GenerateBackground());
+        StartCoroutine(GenerateAll());
+    }
+
+    private IEnumerator GenerateAll()
+    {
+        yield return StartCoroutine(GenerateBackground());
+        
+        yield return StartCoroutine(GenerateBorder());
+        
+        yield return StartCoroutine(GenerateBinaryTree());
+        
+        Debug.Log("¡Generación completada!");
     }
 
     private IEnumerator GenerateBackground()
@@ -99,7 +110,6 @@ public class MazeGen : MonoBehaviour
 
             stepLen++;
         }
-        yield return GenerateBorder();
     }
     private IEnumerator GenerateBorder()
     {
@@ -130,6 +140,70 @@ public class MazeGen : MonoBehaviour
             SetCell(i, 0,TypeOfBlock.MazeWall);
             yield return StepWait();
         }
+    }
+
+    private IEnumerator GenerateBinaryTree()
+    {
+        for (int x = 1; x < X - 1; x++)
+        {
+            for (int y = 1; y < Y - 1; y++)
+            {
+                SetCell(x, y, TypeOfBlock.MazeWall);
+                yield return StepWait();
+            }
+        }
+        yield return StepWait();
+        for (int y = 1; y < Y - 1; y += 2)
+        {
+            for (int x = 1; x < X - 1; x += 2)
+            {
+                // 1. Convertimos la "habitación" actual en camino
+                SetCell(x, y, TypeOfBlock.Path);
+                yield return StepWait();
+
+                // 2. Evaluamos si PODEMOS ir hacia arriba o hacia la derecha
+                bool canGoUp = (y + 1 < Y - 1); // ¿Hay espacio arriba sin tocar el borde?
+                bool canGoRight = (x + 1 < X - 1); // ¿Hay espacio a la derecha sin tocar el borde?
+
+                // 3. Lógica de decisión
+                if (canGoUp && canGoRight)
+                {
+                    // ¡Aquí viene la magia! 
+                    // Lanza una moneda al aire (usa Random.Range)
+                    // Si sale 0, rompe la pared de Arriba (SetCell en x, y+1)
+                    // Si sale 1, rompe la pared de la Derecha (SetCell en x+1, y)
+                    
+                    // [ESCRIBE TU LÓGICA AQUÍ]
+                    int rnd = UnityEngine.Random.Range(0,2);
+                    switch (rnd)
+                    {
+                        case 0:
+                            SetCell(x, y+1, TypeOfBlock.Path);
+                            yield return StepWait();
+                        break;
+                        case 1:
+                            SetCell(x+1, y, TypeOfBlock.Path);
+                            yield return StepWait();
+                        break;
+                    }
+                }
+                else if (canGoUp)
+                {
+                    // Solo podemos ir arriba, así que obligatoriamente rompemos la pared de arriba
+                    SetCell(x, y + 1, TypeOfBlock.Path);
+                    yield return StepWait();
+                }
+                else if (canGoRight)
+                {
+                    // Solo podemos ir a la derecha, obligatoriamente rompemos la pared de la derecha
+                    SetCell(x+1, y, TypeOfBlock.Path);
+                    yield return StepWait();
+                }
+                
+                yield return StepWait();
+            }
+        }
+
     }
 
     YieldInstruction StepWait()
@@ -179,7 +253,7 @@ public class MazeGen : MonoBehaviour
         var mr = go.AddComponent<MeshRenderer>();
         mr.sharedMaterial = materials[(int)TypeOfBlock.Background];
         cellRenderer[gx, gy] = mr;
-        Debug.Log("el cubo se instancio en width: "+gx +" y height: "+ gy + " con el valor: "+ TypeOfBlock.Background);
+        //Debug.Log("el cubo se instancio en width: "+gx +" y height: "+ gy + " con el valor: "+ TypeOfBlock.Background);
 
     }
     
