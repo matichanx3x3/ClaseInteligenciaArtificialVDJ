@@ -214,14 +214,13 @@ public class MazeGen : MonoBehaviour
 
 private IEnumerator GenerateEntryAndExit()
     {
-        // la entrada es aleatoria del borde inferior o izquierdo
         // se necesita asegurarse que tenga que conectar con un pasillo. (al parece siendo impar siempre cumple.)
         int randomEntryPos;
         do {
             randomEntryPos = UnityEngine.Random.Range(1, X - 1);
-        } while (randomEntryPos % 2 == 0); // Repite si es par, queremos que sea impar.
+        } while (randomEntryPos % 2 == 0);
 
-        // Decidimos aleatoriamente si ponerla abajo o a la izquierda
+        // la entrada es aleatoria del borde inferior o izquierdo
         if (UnityEngine.Random.Range(0, 2) == 0)
         {
             SetCell(randomEntryPos, 0, TypeOfBlock.Entry); // Borde inferior
@@ -232,30 +231,30 @@ private IEnumerator GenerateEntryAndExit()
         }
         yield return StepWait();
 
-        // SALIDA ALEATORIA EN EL BORDE SUPERIOR O DERECHO
+        // la entrada es aleatoria del borde superior o derecha
         int randomExitPos;
         do {
             randomExitPos = UnityEngine.Random.Range(1, X - 1);
         } while (randomExitPos % 2 == 0); 
 
-        // Aquí usamos un cálculo matemático para el borde máximo válido.
-        // Si la matriz es 40, el último pasillo estará en 37 o 39, así que lo calculamos:
+        //cálculo matemático para el borde máximo válido.
+        // matriz es 40, el último pasillo estará entre 37 o 39
         int maxValidEdge = (X % 2 == 0) ? X - 3 : X - 2;
 
         if (UnityEngine.Random.Range(0, 2) == 0)
         {
             // Borde superior
             SetCell(randomExitPos, maxValidEdge + 1, TypeOfBlock.Exit);
-            SetCell(randomExitPos, maxValidEdge, TypeOfBlock.Path); // Asegura conexión
+            SetCell(randomExitPos, maxValidEdge, TypeOfBlock.Path); // busca dar conexión
         }
         else
         {
             // Borde derecho
             SetCell(maxValidEdge + 1, randomExitPos, TypeOfBlock.Exit);
-            SetCell(maxValidEdge, randomExitPos, TypeOfBlock.Path); // Asegura conexión
+            SetCell(maxValidEdge, randomExitPos, TypeOfBlock.Path); // busca dar conexión
         }
         yield return StepWait();
-        GetComponent<MazeSolver>().StartSolving();
+        GetComponent<MazeSolver>().StartSolving(); //empieza a resolver el laberinto
     }
 
     YieldInstruction StepWait()

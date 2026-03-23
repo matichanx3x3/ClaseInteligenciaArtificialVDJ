@@ -6,9 +6,9 @@ public class Node
     public int x, y;
     public Node parent; // de que celda venimos
     
-    // Para A*
+    // para A*
     public int gCost; // coste inicial
-    public int hCost; // coste para el final (heuristico)
+    public int hCost; // coste para el final
     public int fCost => gCost + hCost; // coste total
 
     public Node(int _x, int _y)
@@ -25,10 +25,10 @@ public class MazeSolver : MonoBehaviour
     public float searchStepDelay = 0.05f;
 
     [Header("Materiales Visuales")]
-    public Material exploredMaterial; // Color de las celdas que el algoritmo ha revisado (ej. Amarillo)
-    public Material finalPathMaterial; // Color de la solución final (ej. Azul o Rojo)
+    public Material exploredMaterial;
+    public Material finalPathMaterial;
 
-    // Referencias a los datos de MazeGen
+    // refs mazegen
     private MazeGen mazeGenerator;
     private int startX, startY;
     private int exitX, exitY;
@@ -38,14 +38,14 @@ public class MazeSolver : MonoBehaviour
         mazeGenerator = GetComponent<MazeGen>();
     }
 
-    // Este método se llamará después de que termine la Parte 1
+    // lo empieza cuando se llame (cuando termina de resolver la gen)
     public void StartSolving()
     {
         FindStartAndExitPoints();
         StartCoroutine(SolveMazeCoroutine());
     }
 
-    // 2. Buscamos dónde están las casillas Entry y Exit generadas aleatoriamente
+    // se busca dónde están las casillas entry y exit generadas aleatoriamente
     private void FindStartAndExitPoints()
     {
         for (int x = 0; x < mazeGenerator.X; x++)
@@ -66,7 +66,7 @@ public class MazeSolver : MonoBehaviour
         }
     }
 
-    // 3. El Bucle Principal del Pathfinding
+    // bucle inicial de pathfinding.
     private IEnumerator SolveMazeCoroutine()
     {
         List<Node> openList = new List<Node>();
@@ -79,12 +79,10 @@ public class MazeSolver : MonoBehaviour
         {
             Node currentNode;
 
-            // ---------------------------------------------------------
-            // LA DIFERENCIA ENTRE LOS DOS ALGORITMOS (El Flag)
-            // ---------------------------------------------------------
+            // ambas propuestas de algoritmos
             if (useHeuristic)
             {
-                // A* (Con Heurística): Sacar el nodo con el menor coste fCost
+                // A* con heuristica: sacar el nodo con el menor coste
                 currentNode = openList[0];
                 for (int i = 1; i < openList.Count; i++)
                 {
@@ -98,44 +96,41 @@ public class MazeSolver : MonoBehaviour
             else
             {
                 //referencia: https://en.wikipedia.org/wiki/Breadth-first_search
-                // Saca el primer nodo que entró
+                // Sin heuristica: Saca el primer nodo que entró
                 currentNode = openList[0];
             }
 
             openList.Remove(currentNode);
             closedSet.Add($"{currentNode.x},{currentNode.y}");
 
-            // Pinto la celda para que se vea cómo busca, EXCEPTO si es la entrada o salida
+            // pinta las celdas
+            // EXCEPTO si es la entrada o salida
             if (!IsStartOrExit(currentNode.x, currentNode.y))
             {
                 mazeGenerator.GetCellRenderer(currentNode.x, currentNode.y).sharedMaterial = exploredMaterial;
             }
             
-            yield return new WaitForSeconds(searchStepDelay); // Punto extra: Generación paso a paso
+            yield return new WaitForSeconds(searchStepDelay);
 
-            // ---------------------------------------------------------
-            // ¿HEMOS LLEGADO A LA SALIDA?
-            // ---------------------------------------------------------
+            // ya se esta en la salida?
             if (currentNode.x == exitX && currentNode.y == exitY)
             {
                 yield return TracePathBack(currentNode); // Dibuja la línea final
-                yield break; // Termina la corrutina
+                yield break;
             }
 
-            // ---------------------------------------------------------
-            // EVALUAR VECINOS (Arriba, Abajo, Izquierda, Derecha)
-            // ---------------------------------------------------------
+            // evalua vecinos
             List<Node> neighbors = GetValidNeighbors(currentNode);
 
             foreach (Node neighbor in neighbors)
             {
                 if (closedSet.Contains($"{neighbor.x},{neighbor.y}"))
-                    continue; // Ya evaluamos esta celda, la ignoramos
+                    continue; // si ya esta evaluada la celda, solo continua
 
-                // Coste desde el inicio hasta el vecino (Avanzar 1 casilla cuesta 10 puntos)
+                // avanza al vecino segun un coste.
                 int newMovementCostToNeighbor = currentNode.gCost + 10; 
 
-                // Si el vecino es nuevo, o si hemos encontrado un camino más corto hacia él
+                // si el vecino es nuevo, se busca el camino más corto.
                 Node nodeInOpenList = openList.Find(n => n.x == neighbor.x && n.y == neighbor.y);
                 
                 if (nodeInOpenList == null || newMovementCostToNeighbor < nodeInOpenList.gCost)
@@ -155,44 +150,41 @@ public class MazeSolver : MonoBehaviour
         Debug.LogWarning("No se encontró ningún camino. (Esto no debería pasar en un Binary Tree)");
     }
 
-    // 4. Retraza el camino desde la salida hasta la entrada usando los nodos "padre"
+    // metodo para trazar el camino
     private IEnumerator TracePathBack(Node endNode)
     {
         List<Node> finalPath = new List<Node>();
         Node currentNode = endNode;
 
-        // 1. Recopilamos todos los nodos desde la Salida hasta la Entrada
+        // se recolecta los nodos desde el final al inicio.
         while (currentNode != null)
         {
             finalPath.Add(currentNode);
             currentNode = currentNode.parent;
         }
 
-        // 2. Le damos la vuelta a la lista para que empiece en la Entrada y termine en la Salida
+        // unicamente para que empiece desde el inicio al final.
         finalPath.Reverse();
 
-        // 3. Pintamos el camino paso a paso
+        // se pinta todo el camino
         foreach (Node pathNode in finalPath)
         {
-            // Opcional: Si no quieres repintar la casilla verde de entrada o roja de salida,
-            // puedes dejar este IF. Si prefieres que la línea los cubra, quítalo.
             if (!IsStartOrExit(pathNode.x, pathNode.y))
             {
                 mazeGenerator.GetCellRenderer(pathNode.x, pathNode.y).sharedMaterial = finalPathMaterial;
-                yield return new WaitForSeconds(searchStepDelay * 2f); // Un poco más lento para darle drama visual
+                yield return new WaitForSeconds(searchStepDelay * 2f);
             }
         }
 
         Debug.Log("¡Laberinto resuelto desde el inicio hasta el final!");
     }
 
-    // --- FUNCIONES AUXILIARES ---
 
     private List<Node> GetValidNeighbors(Node node)
     {
         List<Node> neighbors = new List<Node>();
 
-        // Solo evalúa Cruz (Arriba, Abajo, Izquierda, Derecha), no diagonales.
+        // Solo evalúa arriba, abajo, izquierda, derecha
         int[] dx = { 0, 0, -1, 1 };
         int[] dy = { 1, -1, 0, 0 };
 
