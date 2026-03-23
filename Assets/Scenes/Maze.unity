@@ -181,7 +181,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 12.5
+  orthographic size: 22
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -436,6 +436,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1250562432}
   - component: {fileID: 1250562433}
+  - component: {fileID: 1250562434}
   m_Layer: 0
   m_Name: MazePoint
   m_TagString: Untagged
@@ -477,12 +478,28 @@ MonoBehaviour:
   - {fileID: 2100000, guid: d7960ffa30614ed4087e98bee133589d, type: 2}
   - {fileID: 2100000, guid: 65b0e956d122b55459c8ee7f4b6c48e3, type: 2}
   - {fileID: 2100000, guid: 1b363e297c0810d4a9318ec28d2f4202, type: 2}
-  X: 17
-  Y: 21
+  X: 40
+  Y: 40
   cellSize: 1
-  stepDelay: 0.01
+  stepDelay: 0.001
   centerX: 0
   centerY: 0
+--- !u!114 &1250562434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1250562431}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2514ee7745b427440aef1a1cc65fc704, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useHeuristic: 1
+  searchStepDelay: 0.05
+  exploredMaterial: {fileID: 2100000, guid: d9a86e852f2014741956b43c2fbefd39, type: 2}
+  finalPathMaterial: {fileID: 2100000, guid: 23a4db55d5f48004a8520d86093f243d, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -144,66 +144,118 @@ public class MazeGen : MonoBehaviour
 
     private IEnumerator GenerateBinaryTree()
     {
+        //referencia: https://weblog.jamisbuck.org/2011/2/1/maze-generation-binary-tree-algorithm
+
+        // 1: llenar el espacio de paredes
         for (int x = 1; x < X - 1; x++)
         {
             for (int y = 1; y < Y - 1; y++)
             {
                 SetCell(x, y, TypeOfBlock.MazeWall);
-                yield return StepWait();
             }
         }
         yield return StepWait();
+
+        // 2: genera puntos aislados, esto pq si fuera punto por punto rellenaria TOOODO el espacio y no se busca eso
+        // se recorre desde abajo hasta arriba de izq a der.
         for (int y = 1; y < Y - 1; y += 2)
         {
             for (int x = 1; x < X - 1; x += 2)
             {
-                // 1. Convertimos la "habitación" actual en camino
                 SetCell(x, y, TypeOfBlock.Path);
-                yield return StepWait();
-
-                // 2. Evaluamos si PODEMOS ir hacia arriba o hacia la derecha
-                bool canGoUp = (y + 1 < Y - 1); // ¿Hay espacio arriba sin tocar el borde?
-                bool canGoRight = (x + 1 < X - 1); // ¿Hay espacio a la derecha sin tocar el borde?
-
-                // 3. Lógica de decisión
-                if (canGoUp && canGoRight)
-                {
-                    // ¡Aquí viene la magia! 
-                    // Lanza una moneda al aire (usa Random.Range)
-                    // Si sale 0, rompe la pared de Arriba (SetCell en x, y+1)
-                    // Si sale 1, rompe la pared de la Derecha (SetCell en x+1, y)
-                    
-                    // [ESCRIBE TU LÓGICA AQUÍ]
-                    int rnd = UnityEngine.Random.Range(0,2);
-                    switch (rnd)
-                    {
-                        case 0:
-                            SetCell(x, y+1, TypeOfBlock.Path);
-                            yield return StepWait();
-                        break;
-                        case 1:
-                            SetCell(x+1, y, TypeOfBlock.Path);
-                            yield return StepWait();
-                        break;
-                    }
-                }
-                else if (canGoUp)
-                {
-                    // Solo podemos ir arriba, así que obligatoriamente rompemos la pared de arriba
-                    SetCell(x, y + 1, TypeOfBlock.Path);
-                    yield return StepWait();
-                }
-                else if (canGoRight)
-                {
-                    // Solo podemos ir a la derecha, obligatoriamente rompemos la pared de la derecha
-                    SetCell(x+1, y, TypeOfBlock.Path);
-                    yield return StepWait();
-                }
-                
-                yield return StepWait();
+                yield return StepWait(); // convierte a camino paso por paso
             }
         }
 
+        yield return new WaitForSeconds(0.5f); 
+
+        // 3: se aplica el algoritmo de binary tree
+        for (int y = 1; y < Y - 1; y += 2)
+        {
+            for (int x = 1; x < X - 1; x += 2)
+            {
+                
+                bool hasSouth = (y > 1);
+                bool hasWest = (x > 1);
+
+                // se empieza a aplicar las reglas del algoritmo
+                if (hasSouth && hasWest)
+                {
+                    // si tiene vecino en ambos lados, elige aleatoriamente
+                    if (UnityEngine.Random.Range(0, 2) == 0)
+                    {
+                        SetCell(x, y - 1, TypeOfBlock.Path); // abre para el sur
+                    }
+                    else
+                    {
+                        SetCell(x - 1, y, TypeOfBlock.Path); // abre para el oeste
+                    }
+                    yield return StepWait();
+                }
+                else if (hasSouth && !hasWest)
+                {
+                    // tiene vecino en el sur?
+                    SetCell(x, y - 1, TypeOfBlock.Path);
+                    yield return StepWait(); 
+                }
+                else if (!hasSouth && hasWest)
+                {
+                    // tiene vecino en el oeste?
+                    SetCell(x - 1, y, TypeOfBlock.Path);
+                    yield return StepWait(); 
+                }
+                //si no tiene ningun vecino (es decir que esta en la esquina inicial, no hace nada y pasaria a la siguiente habitacion)
+            }
+        }
+
+        // entrada y salida
+        yield return GenerateEntryAndExit();
+    }
+
+private IEnumerator GenerateEntryAndExit()
+    {
+        // la entrada es aleatoria del borde inferior o izquierdo
+        // se necesita asegurarse que tenga que conectar con un pasillo. (al parece siendo impar siempre cumple.)
+        int randomEntryPos;
+        do {
+            randomEntryPos = UnityEngine.Random.Range(1, X - 1);
+        } while (randomEntryPos % 2 == 0); // Repite si es par, queremos que sea impar.
+
+        // Decidimos aleatoriamente si ponerla abajo o a la izquierda
+        if (UnityEngine.Random.Range(0, 2) == 0)
+        {
+            SetCell(randomEntryPos, 0, TypeOfBlock.Entry); // Borde inferior
+        }
+        else
+        {
+            SetCell(0, randomEntryPos, TypeOfBlock.Entry); // Borde izquierdo
+        }
+        yield return StepWait();
+
+        // SALIDA ALEATORIA EN EL BORDE SUPERIOR O DERECHO
+        int randomExitPos;
+        do {
+            randomExitPos = UnityEngine.Random.Range(1, X - 1);
+        } while (randomExitPos % 2 == 0); 
+
+        // Aquí usamos un cálculo matemático para el borde máximo válido.
+        // Si la matriz es 40, el último pasillo estará en 37 o 39, así que lo calculamos:
+        int maxValidEdge = (X % 2 == 0) ? X - 3 : X - 2;
+
+        if (UnityEngine.Random.Range(0, 2) == 0)
+        {
+            // Borde superior
+            SetCell(randomExitPos, maxValidEdge + 1, TypeOfBlock.Exit);
+            SetCell(randomExitPos, maxValidEdge, TypeOfBlock.Path); // Asegura conexión
+        }
+        else
+        {
+            // Borde derecho
+            SetCell(maxValidEdge + 1, randomExitPos, TypeOfBlock.Exit);
+            SetCell(maxValidEdge, randomExitPos, TypeOfBlock.Path); // Asegura conexión
+        }
+        yield return StepWait();
+        GetComponent<MazeSolver>().StartSolving();
     }
 
     YieldInstruction StepWait()
@@ -253,8 +305,11 @@ public class MazeGen : MonoBehaviour
         var mr = go.AddComponent<MeshRenderer>();
         mr.sharedMaterial = materials[(int)TypeOfBlock.Background];
         cellRenderer[gx, gy] = mr;
-        //Debug.Log("el cubo se instancio en width: "+gx +" y height: "+ gy + " con el valor: "+ TypeOfBlock.Background);
 
     }
+    public MeshRenderer GetCellRenderer(int x, int y)
+{
+    return cellRenderer[x, y];
+}
     
 }
