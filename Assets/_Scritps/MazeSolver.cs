@@ -33,6 +33,8 @@ public class MazeSolver : MonoBehaviour
     private int startX, startY;
     private int exitX, exitY;
 
+    public bool isFinished = false;
+
     void Awake()
     {
         mazeGenerator = GetComponent<MazeGen>();
@@ -176,7 +178,7 @@ public class MazeSolver : MonoBehaviour
             }
         }
 
-        Debug.Log("¡Laberinto resuelto desde el inicio hasta el final!");
+        isFinished = true;
     }
 
 

@@ -34,6 +34,21 @@ public class MazeGen : MonoBehaviour
     void Start()
     {
         Generate();
+
+    }
+
+    void Update()
+    {
+        if (GetComponent<MazeSolver>().isFinished == true)
+        { //solo cuando se haya terminado una vez el laberinto.
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                GetComponent<MazeSolver>().isFinished = false;
+                StopAllCoroutines();
+                StartCoroutine(GenerateBorder());
+                StartCoroutine(GenerateBinaryTree());
+            }
+        }
     }
     public void Generate()
     {
@@ -57,7 +72,6 @@ public class MazeGen : MonoBehaviour
         
         yield return StartCoroutine(GenerateBinaryTree());
         
-        Debug.Log("¡Generación completada!");
     }
 
     private IEnumerator GenerateBackground()
@@ -307,8 +321,8 @@ private IEnumerator GenerateEntryAndExit()
 
     }
     public MeshRenderer GetCellRenderer(int x, int y)
-{
-    return cellRenderer[x, y];
-}
+    {
+        return cellRenderer[x, y];
+    }
     
 }
