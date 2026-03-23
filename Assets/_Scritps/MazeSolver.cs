@@ -19,12 +19,11 @@ public class Node
 }
 public class MazeSolver : MonoBehaviour
 {
-    [Header("Ajustes del Pathfinding")]
-    [Tooltip("Activar para usar A* (con heurística). Desactivar para usar BFS (sin heurística).")]
+    [Header("Pathfinding")]
     public bool useHeuristic = false;
     public float searchStepDelay = 0.05f;
 
-    [Header("Materiales Visuales")]
+    [Header("Visuales")]
     public Material exploredMaterial;
     public Material finalPathMaterial;
 
@@ -40,7 +39,7 @@ public class MazeSolver : MonoBehaviour
         mazeGenerator = GetComponent<MazeGen>();
     }
 
-    // lo empieza cuando se llame (cuando termina de resolver la gen)
+    // lo empieza cuando se llame (cuando termina de resolver la gen del laberinto)
     public void StartSolving()
     {
         FindStartAndExitPoints();
@@ -72,7 +71,7 @@ public class MazeSolver : MonoBehaviour
     private IEnumerator SolveMazeCoroutine()
     {
         List<Node> openList = new List<Node>();
-        HashSet<string> closedSet = new HashSet<string>(); // Usamos un string "x,y" para búsquedas rápidas
+        HashSet<string> closedSet = new HashSet<string>(); //para busqueda rapida
 
         Node startNode = new Node(startX, startY);
         openList.Add(startNode);
@@ -84,6 +83,7 @@ public class MazeSolver : MonoBehaviour
             // ambas propuestas de algoritmos
             if (useHeuristic)
             {
+                //ref: https://www.redblobgames.com/pathfinding/a-star/introduction.html
                 // A* con heuristica: sacar el nodo con el menor coste
                 currentNode = openList[0];
                 for (int i = 1; i < openList.Count; i++)
@@ -97,7 +97,7 @@ public class MazeSolver : MonoBehaviour
             }
             else
             {
-                //referencia: https://en.wikipedia.org/wiki/Breadth-first_search
+                //ref: https://en.wikipedia.org/wiki/Breadth-first_search
                 // Sin heuristica: Saca el primer nodo que entró
                 currentNode = openList[0];
             }
@@ -149,7 +149,6 @@ public class MazeSolver : MonoBehaviour
             }
         }
 
-        Debug.LogWarning("No se encontró ningún camino. (Esto no debería pasar en un Binary Tree)");
     }
 
     // metodo para trazar el camino
@@ -210,6 +209,9 @@ public class MazeSolver : MonoBehaviour
 
     private int CalculateManhattanDistance(int x1, int y1, int x2, int y2)
     {
+        //usado en el calculo de entornos basado en cuadriculas
+        //calcula el número de pasos mínimo absoluto
+        //ref: https://www.datacamp.com/es/tutorial/manhattan-distance
         return (Mathf.Abs(x1 - x2) + Mathf.Abs(y1 - y2)) * 10;
     }
 
