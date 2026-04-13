@@ -14,15 +14,30 @@ public class NN_Sensor : MonoBehaviour
 
 
     [SerializeField] public float score;
-    [SerializeField] public float hitPenalty=25;
-    [SerializeField] public float frictionPenalty = 25;
+    [SerializeField] public float hitPenalty= 5;
+    [SerializeField] public float frictionPenalty = 1;
     [SerializeField] public float collisions;
+    private float timerForNewCollision = 0.5f;
+    private bool colBool = false;
     private void Start()
     {
         lm=LayerMask.GetMask("Circuit");
         score = 0;
         collisions = 0;
         //brakeTime = 0;
+    }
+
+    void Update()
+    {
+        if (colBool)
+        {
+            timerForNewCollision -= Time.deltaTime;
+            if (timerForNewCollision <= 0)
+            {
+                colBool = false;
+                timerForNewCollision = 0.5f;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -58,12 +73,12 @@ public class NN_Sensor : MonoBehaviour
     bool hit = false;
     public void CalculateScore()
     {
-        
         //aquellos que van más rapido tienen más nota.
-        //si se chocan se les da un poquito más de nota.
-
+        //si no se chocan se les da un poquito más de nota.
         if(!hit)
             score+= Time.fixedDeltaTime;
+        else
+            score+= Time.fixedDeltaTime - 1;
     }
 
     public float GetScore()
@@ -71,17 +86,20 @@ public class NN_Sensor : MonoBehaviour
         return score;
     }
 
-    private void OnCollisionStay(Collision collision)
+    public void OnCollisionStay(Collision collision)
     {
-
+        if(collision.collider.tag != "coxecito")
+            score-= frictionPenalty*0.0015f;
     }
 
     public void OnCollisionEnter(Collision collision)
     {
-     
+        if (!colBool)
+        {
+            collisions++;
+            score -= hitPenalty;
+            colBool = true;
+        }
     }
-
-
-
 
 }

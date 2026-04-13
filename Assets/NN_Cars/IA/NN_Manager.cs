@@ -106,7 +106,8 @@ public class NN_Manager : MonoBehaviour
             max = Mathf.Max(max, s.GetScore());
         }
         float[] scores = new float[cars.Length];
-        float average= (max + min)/2;
+        float average= (max + (max + min)/scores.Length)/2;
+        Debug.Log("la media actual es:" + average);
 
 
         GameObject[] selected = Selection(cars, average);//Selected cars
@@ -125,7 +126,7 @@ public class NN_Manager : MonoBehaviour
         List<GameObject> l = new List<GameObject>();
         for (int i=0;i< ias.Length;i++)
         {
-            if (ias[i].score >= grade)
+            if (ias[i].GetScore() >= grade)
             {
                 l.Add(ias[i].transform.parent.gameObject);
             }

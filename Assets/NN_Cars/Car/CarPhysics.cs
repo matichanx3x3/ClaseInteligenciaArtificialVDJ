@@ -236,7 +236,7 @@ public class CarPhysics : MonoBehaviour
 
     void OnCollisionStay(Collision collision)
     {
-        transform.GetChild(0).GetComponent<NN_Sensor>().OnCollisionEnter(collision);
+        transform.GetChild(0).GetComponent<NN_Sensor>().OnCollisionStay(collision);
     }
     private void OnDrawGizmos()
     {
