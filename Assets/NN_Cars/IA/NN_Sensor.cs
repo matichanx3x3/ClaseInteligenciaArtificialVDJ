@@ -14,8 +14,8 @@ public class NN_Sensor : MonoBehaviour
 
 
     [SerializeField] public float score;
-    [SerializeField] public float hitPenalty= 5;
-    [SerializeField] public float frictionPenalty = 1;
+    [SerializeField] public float hitPenalty= 1;
+    [SerializeField] public float frictionPenalty = 0.5f;
     [SerializeField] public float collisions;
     private float timerForNewCollision = 0.5f;
     private bool colBool = false;
@@ -75,9 +75,9 @@ public class NN_Sensor : MonoBehaviour
     {
         //aquellos que van más rapido tienen más nota.
         //si no se chocan se les da un poquito más de nota.
-        if(!hit)
+        if(!hit && carController.carSpeed > 1)
             score+= Time.fixedDeltaTime;
-        else
+        else if (hit && carController.carSpeed > 1)
             score+= Time.fixedDeltaTime - 1;
     }
 
@@ -88,13 +88,13 @@ public class NN_Sensor : MonoBehaviour
 
     public void OnCollisionStay(Collision collision)
     {
-        if(collision.collider.tag != "coxecito")
+        if(collision.collider.tag != "coxecito" && carController.carSpeed > 1)
             score-= frictionPenalty*0.0015f;
     }
 
     public void OnCollisionEnter(Collision collision)
     {
-        if (!colBool)
+        if (!colBool && carController.carSpeed > 1)
         {
             collisions++;
             score -= hitPenalty;

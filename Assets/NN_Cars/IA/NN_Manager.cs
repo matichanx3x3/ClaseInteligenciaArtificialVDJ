@@ -9,7 +9,7 @@ public class NN_Manager : MonoBehaviour
     [SerializeField] GameObject neuronPrefab;
     [SerializeField] int carCount = 16;
     [SerializeField] float evaluationTime = 10;
-    [SerializeField] float mutability= 1.0f;
+    [SerializeField] float mutability= 3.0f;
 
     void Start()
     {
@@ -106,7 +106,7 @@ public class NN_Manager : MonoBehaviour
             max = Mathf.Max(max, s.GetScore());
         }
         float[] scores = new float[cars.Length];
-        float average= (max + (max + min)/scores.Length)/2;
+        float average= (max + min)/2;
         Debug.Log("la media actual es:" + average);
 
 

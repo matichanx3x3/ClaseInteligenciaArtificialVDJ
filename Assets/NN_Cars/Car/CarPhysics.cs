@@ -37,6 +37,7 @@ public class CarPhysics : MonoBehaviour
     [Range(-45.0f, 45.0f)]
     [SerializeField] float steeringAngle = 22.5f;
 
+    public float carSpeed;
     public bool DrawGizmos = false;
     public bool userControl= false;
     // Start is called before the first frame update
@@ -112,7 +113,7 @@ public class CarPhysics : MonoBehaviour
             suspensionLocalOrigin[c].localRotation = Quaternion.Euler(0, (steering * steeringAngle), 0);
         }
 
-        float carSpeed = Vector3.Project(rb.linearVelocity,transform.forward).magnitude;
+        carSpeed = Vector3.Project(rb.linearVelocity,transform.forward).magnitude;
         float gear = 0.60f + Mathf.Repeat(carSpeed, 8)*0.07f;
         engineRun.pitch = gear;
 
